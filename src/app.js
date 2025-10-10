@@ -64,7 +64,7 @@ const errorHandler = require("./middlewares/error");
 
 const app = express();
 
-// Trust proxy for Render / Vercel
+// Trust proxy (needed for Render/Vercel)
 app.set("trust proxy", 1);
 
 // Security middlewares
@@ -77,31 +77,46 @@ app.use(hpp());
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
-// Logging (development only)
+// Logging (only in development)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// ✅ Proper CORS Configuration for Vercel + Render
+// ✅ CORS configuration for frontend and local testing
+const allowedOrigins = [
+  process.env.CLIENT_URL,      // Production frontend (Vercel)
+  "http://localhost:5173",     // Local frontend
+  "http://localhost:3000"      // Optional: React default
+];
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL, // from your .env file
-      "http://localhost:5173", // for local testing
-    ],
+    origin: function(origin, callback) {
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("CORS policy: Origin not allowed"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-// Routes
+// Rate limiter for auth routes (optional)
+app.use("/api/v1/auth", authLimiter);
+
+// API routes
 app.use("/api/v1", mainRouter);
 
-// Error handler
+// Global error handler
 app.use(errorHandler);
 
-// Connect DB and start server
+// Connect to MongoDB
 connectDB(process.env.MONGO_URI);
 
 module.exports = app;
+
