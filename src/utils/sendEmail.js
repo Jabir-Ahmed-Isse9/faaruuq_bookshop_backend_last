@@ -27,7 +27,7 @@ async function sendEmail(to, subject, text) {
     await axios.post(
       "https://api.resend.com/emails",
       {
-        from: "Faaruuq Bookshop <onboarding@resend.dev>",
+        from: "Faaruuq Bookshop <no-reply@faaruuqbookshop.com>", // ✅ use your verified domain
         to,
         subject,
         text,
