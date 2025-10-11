@@ -38,7 +38,7 @@ if (process.env.NODE_ENV === "development") {
 const allowedOrigins = [
   process.env.CLIENT_URL,      // Production frontend (Vercel)
   "http://localhost:5173",     // Local frontend
-  "https://faaruuq-bookshop-frontend.vercel.app"      // Optional: React default
+  "https://www.faaruuqbookshop.com"      // Optional: React default
 ];
 
 app.use(
